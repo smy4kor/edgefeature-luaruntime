@@ -17,10 +17,12 @@ def on_connect(client, userdata, flags, rc):
 # msg is of type MQTTMessage
 def on_message(client, userdata, msg):
     m_decode=str(msg.payload.decode("utf-8","ignore"))
-    cmd = DittoCommand(m_decode)
+    print("message topic is" + msg.topic)
+    cmd = DittoCommand(m_decode,msg.topic)
     print('Is install command: ' + str(cmd.isInstallCommand()));
     print('Is software updatable command: ' + str(cmd.isSoftwareUpdate()));
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
+        print("request id is: " + str(cmd.getRequestId()))
         print('Parsing software module information')
         for swMod in cmd.getSoftwareModules():
             print(swMod.toJson())

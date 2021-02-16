@@ -1,4 +1,5 @@
 import json
+import re
 
 class Artifacts:
     def __init__(self,name,url):
@@ -14,10 +15,11 @@ class SoftwareModules:
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 class DittoCommand:
-    def __init__(self, mqttPayloadStr):
+    def __init__(self, mqttPayloadStr,topic):
         payload = json.loads(mqttPayloadStr)
         self.payload = payload
-        self.topic = payload['topic']
+        self.topic = topic
+        self.payloadTopic = payload['topic']
         self.path = payload['path']
         self.dittoCorrelationId = payload['headers']["correlation-id"]
     def isSoftwareUpdate(self):
@@ -26,6 +28,14 @@ class DittoCommand:
         return self.path.endswith('install')
     def isDownloadCommand(self):
         return self.path.endswith('download')
+    def getRequestId(self):
+        pattern = "req/(.*)/" ## everything between req/ and /install is the request id. Ex topic: command///req/01fp-pdid6m-12i8u431qmpi1b-1m2zqv2replies/install
+        x = re.search(pattern, self.topic)
+        if x:
+            return x.group(1)
+        else:
+            return None
+    
     def print(self):
         myorder = "Topic is {}, path is {}, dittoCorrelationId is {}."
         print(myorder.format(self.topic, self.path, self.dittoCorrelationId))
@@ -43,4 +53,3 @@ class DittoCommand:
              arts.append(Artifacts(artifact['filename'], artifact['download']['HTTPS']['url']))
             lst.append(SoftwareModules(name,vrsn,arts))
         return lst
-
