@@ -1,0 +1,37 @@
+#!/usr/bin/python3
+import paho.mqtt.client as mqtt
+import time
+import json
+from commands import DittoCommand
+import urllib.request
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+
+    # Subscribing to a topic that sends install or download command
+    client.subscribe("command///req/#")
+    
+    # hint: to register as agent or operation status, use "e".
+
+# The callback when a install or download command is received
+# msg is of type MQTTMessage
+def on_message(client, userdata, msg):
+    m_decode=str(msg.payload.decode("utf-8","ignore"))
+    cmd = DittoCommand(m_decode)
+    print('Is install command: ' + str(cmd.isInstallCommand()));
+    print('Is software updatable command: ' + str(cmd.isSoftwareUpdate()));
+    if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
+        print('Parsing software module information')
+        for swMod in cmd.getSoftwareModules():
+            print(swMod.toJson())
+            for art in swMod.artifacts:
+                urllib.request.urlretrieve(art.url, art.name)
+                print('downloaded ' + art.name)
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("localhost", 1883, 60)
+
+client.loop_forever()

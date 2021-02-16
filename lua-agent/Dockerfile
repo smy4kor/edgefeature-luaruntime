@@ -1,0 +1,21 @@
+FROM python:3.9
+
+### If running on the host machine, we might have to install python there. And may be a different base image? ###
+### RUN yum -y install python3
+## RUN alias python=python3
+## RUN sudo apt install python3-pip
+## RUN pip3 install paho-mqtt python-etcd
+## RUN pip3 install lupa
+
+### Add own Entrypoint Script, and other scripts dedicated for each use case of the agent ###
+COPY ./run.sh /run.sh
+COPY ./python-scripts/register-agent.py /register-agent.py
+COPY ./python-scripts/subscribe.py /subscribe.py
+
+RUN chmod +x register-agent.py 
+RUN chmod +x subscribe.py
+
+
+EXPOSE 22
+
+ENTRYPOINT ["sh", "/run.sh"]
