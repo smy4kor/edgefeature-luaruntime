@@ -3,6 +3,9 @@ This is a groovy based implementation which does the following:
 - Register a [software updatable](https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0) agent of type "lua".
 - Subscribe for download or install operation commands using the [mqtt announcements](https://docs.bosch-iot-suite.com/edge/index.html#109654.htm).
 
+- [Things protocol patterns](https://wiki.bosch-si.com/display/MBSIOTSDK/Things+Protocol+Patterns#ThingsProtocolPatterns-Command.1)
+  - [Complete ditto protocol](https://www.eclipse.org/ditto/1.5/protocol-specification-things-create-or-modify.html)
+
 
 # Developer Examples
 This section has some examples to help you become familiar with some of the technologies used in this demo.
