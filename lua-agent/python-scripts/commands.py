@@ -17,10 +17,11 @@ class SoftwareModules:
 class DittoCommand:
     def __init__(self, payload,topic):
         self.payload = payload
-        self.topic = topic
-        self.payloadTopic = payload['topic']
+        self.mqttTopic = topic
+        self.dittoTopic = payload['topic']
         self.path = payload['path']
         self.dittoCorrelationId = payload['headers']["correlation-id"]
+        self.dittoOriginator = payload['headers']["ditto-originator"]
     def isSoftwareUpdate(self):
         return (self.isInstallCommand() or self.isDownloadCommand())
     def isInstallCommand(self):
@@ -29,16 +30,30 @@ class DittoCommand:
         return self.path.endswith('download')
     def getRequestId(self):
         pattern = "req/(.*)/" ## everything between req/ and /install is the request id. Ex topic: command///req/01fp-pdid6m-12i8u431qmpi1b-1m2zqv2replies/install
-        x = re.search(pattern, self.topic)
+        x = re.search(pattern, self.mqttTopic)
         if x:
             return x.group(1)
         else:
             return None
+    def getServiceInstanceId(self):
+        pattern = "service-instance.(.*).iot-" 
+        ## everything between 'service-instance.' and '.iot-'. 
+        # Ex topic: iot-suite:useridhere/service-instance.abcde.iot-things@device-management
+        x = re.search(pattern, self.dittoOriginator)
+        if x:
+            return x.group(1)
+        else:
+            return None   
     
-    def print(self):
-        myorder = "Topic is {}, path is {}, dittoCorrelationId is {}."
-        print(myorder.format(self.topic, self.path, self.dittoCorrelationId))
-        print(self.payload)
+    def printInfo(self):
+        print("MQTT topic: " + self.mqttTopic)
+        print('Ditto topic: ' + self.dittoTopic)
+        print('Ditto originator: ' + self.dittoOriginator)
+        print('Service instance id: ' + self.getServiceInstanceId())
+        print('Path: ' + self.path)
+        print('Is install command: ' + str(self.isInstallCommand()))
+        print('Is software updatable command: ' + str(self.isSoftwareUpdate()))
+
     def getSoftwareModules(self):
         lst = []
         if 'value' not in self.payload.keys():

@@ -8,13 +8,15 @@ from downloader import DownloadManager
 
 sInfo = SubscriptionInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
-MQTT_TOPIC = [(DEVICE_INFO_TOPIC,0),("command///req/#",0)]
+MQTT_TOPIC = [(DEVICE_INFO_TOPIC, 0), ("command///req/#", 0)]
+
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
+    print("Connected with result code " + str(rc))
     # Subscribing to a topic that sends install or download command
     client.subscribe(MQTT_TOPIC)
     # hint: to register as agent or operation status, use "e".
+
 
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
@@ -32,14 +34,13 @@ def processEvent(msg):
     if msg.topic == DEVICE_INFO_TOPIC:
         sInfo.compute(payload)
     else:
-        handleSupEvent(msg,payload)
+        handleSupEvent(msg, payload)
         aknowledge()
 
-def handleSupEvent(msg,payload):
-    print("message topic is" + msg.topic)
-    cmd = DittoCommand(payload,msg.topic)
-    print('Is install command: ' + str(cmd.isInstallCommand()));
-    print('Is software updatable command: ' + str(cmd.isSoftwareUpdate()));
+
+def handleSupEvent(msg, payload):
+    cmd = DittoCommand(payload, msg.topic)
+    cmd.printInfo()
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
         print("request id is: " + str(cmd.getRequestId()))
         print('Parsing software module information')
@@ -51,6 +52,7 @@ def handleSupEvent(msg,payload):
                  
 def aknowledge():
     print("Sending confirmation for tenant: " + sInfo.hubTenantId)
+
 
 client = mqtt.Client()
 client.on_connect = on_connect
