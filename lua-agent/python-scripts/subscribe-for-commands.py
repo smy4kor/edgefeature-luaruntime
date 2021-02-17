@@ -7,27 +7,37 @@ from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
 
 sInfo = SubscriptionInfo()
+DEVICE_INFO_TOPIC = "edge/thing/response"
+MQTT_TOPIC = [(DEVICE_INFO_TOPIC,0),("command///req/#",0)]
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     # Subscribing to a topic that sends install or download command
-    client.subscribe("command///req/#")
-    
+    client.subscribe(MQTT_TOPIC)
     # hint: to register as agent or operation status, use "e".
 
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
 def on_message(client, userdata, msg):
+    # try-catch will ensure that subscription is not broken in case of exception.
     try:
-        process(msg)
-        aknowledge()
+        processEvent(msg)
     except Exception as err:
         print(err)
 
-def process(msg):
-    m_decode=str(msg.payload.decode("utf-8","ignore"))
+
+def processEvent(msg):
+    payloadStr = str(msg.payload.decode("utf-8", "ignore"))
+    payload = json.loads(payloadStr)
+    if msg.topic == DEVICE_INFO_TOPIC:
+        sInfo.compute(payload)
+    else:
+        handleSupEvent(msg,payload)
+        aknowledge()
+
+def handleSupEvent(msg,payload):
     print("message topic is" + msg.topic)
-    cmd = DittoCommand(m_decode,msg.topic)
+    cmd = DittoCommand(payload,msg.topic)
     print('Is install command: ' + str(cmd.isInstallCommand()));
     print('Is software updatable command: ' + str(cmd.isSoftwareUpdate()));
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():

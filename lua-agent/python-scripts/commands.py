@@ -15,8 +15,7 @@ class SoftwareModules:
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 class DittoCommand:
-    def __init__(self, mqttPayloadStr,topic):
-        payload = json.loads(mqttPayloadStr)
+    def __init__(self, payload,topic):
         self.payload = payload
         self.topic = topic
         self.payloadTopic = payload['topic']

@@ -1,7 +1,11 @@
-#!/usr/bin/python3
-
-# path = 'tmp/provisioning.json'
+import json
 
 class SubscriptionInfo:
-    def __init__(self):
-        self.hubTenantId = "t55cc1e7af2b74e3e9193d69f11564ede_hub" # it is recommended to read it from the topic edge/thing/response
+    def toJson(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+    def compute(self,payload):
+        # See https://docs.bosch-iot-suite.com/edge/index.html#109655.htm
+        self.deviceId = payload["deviceId"]
+        self.hubTenantId = payload["tenantId"]
+        self.policyId = payload["policyId"]
+        print("Device information is \n" + self.toJson())
