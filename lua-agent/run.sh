@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Creating a SoftwareUpdatable agent of type lua"
-python register-agent.py
+python /python-scripts/register-agent.py
 
 echo "Subscribing for mqtt announcements"
-## python subscribe.py
+## python /python-scripts/subscribe-for-commands.py

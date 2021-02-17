@@ -9,11 +9,10 @@ FROM python:3.9
 
 ### Add own Entrypoint Script, and other scripts dedicated for each use case of the agent ###
 COPY ./run.sh /run.sh
-COPY ./python-scripts/register-agent.py /register-agent.py
-COPY ./python-scripts/subscribe.py /subscribe.py
+COPY ./python-scripts /python-scripts
 
-RUN chmod +x register-agent.py 
-RUN chmod +x subscribe.py
+RUN chmod +x /python-scripts/register-agent.py 
+RUN chmod +x /python-scripts/subscribe-for-commands.py
 
 
 EXPOSE 22
