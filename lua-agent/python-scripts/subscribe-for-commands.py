@@ -5,6 +5,7 @@ import json
 from commands import DittoCommand
 from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
+from dittoresponse import DittoResponse
 
 sInfo = SubscriptionInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
@@ -17,6 +18,8 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)
     # hint: to register as agent or operation status, use "e".
 
+def on_publish(client,userdata,result):
+    print("data published \n")
 
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
@@ -29,33 +32,40 @@ def on_message(client, userdata, msg):
 
 
 def processEvent(msg):
+    '''Will process the mqtt message based on the use case. Usecase is determined by the message topic.'''
     payloadStr = str(msg.payload.decode("utf-8", "ignore"))
     payload = json.loads(payloadStr)
     if msg.topic == DEVICE_INFO_TOPIC:
         sInfo.compute(payload)
     else:
-        handleSupEvent(msg, payload)
-        aknowledge()
+        cmd = DittoCommand(payload, msg.topic)
+        handleSupEvent(cmd)
 
-
-def handleSupEvent(msg, payload):
-    cmd = DittoCommand(payload, msg.topic)
+def handleSupEvent(cmd):
     cmd.printInfo()
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
         print("request id is: " + str(cmd.getRequestId()))
         print('Parsing software module information')
         for swMod in cmd.getSoftwareModules():
-            print(swMod.toJson())
+            # print(swMod.toJson())
             for art in swMod.artifacts:
                 DownloadManager().download(art)
+        aknowledge(cmd)
 
                  
-def aknowledge():
-    print("Sending confirmation for tenant: " + sInfo.hubTenantId)
+def aknowledge(cmd):
+    print("======= Sending confirmation for tenant: " + sInfo.hubTenantId + "=============")
+    rsp = DittoResponse("com.bosch.edge/demo/things/twin/commands/modify",cmd.path,200)
+    rsp.noResponse()
+    rsp.appendSubscriptionInfo(sInfo)
+    print(rsp.toJson())
+    client.publish("e",rsp.toJson())
+    print("======== Done =============")
 
 
 client = mqtt.Client()
 client.on_connect = on_connect
+client.on_publish = on_publish
 client.on_message = on_message
 
 client.connect("localhost", 1883, 60)
