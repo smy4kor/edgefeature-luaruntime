@@ -56,8 +56,7 @@ def handleSupEvent(cmd):
 def aknowledge(cmd):
     print("======= Sending confirmation for tenant: " + sInfo.hubTenantId + "=============")
     rsp = DittoResponse("com.bosch.edge/demo/things/twin/commands/modify",cmd.path,200)
-    rsp.noResponse()
-    rsp.appendSubscriptionInfo(sInfo)
+    rsp.prepareAknowledgement(sInfo)
     print(rsp.toJson())
     client.publish("e",rsp.toJson())
     print("======== Done =============")
