@@ -69,7 +69,7 @@ def updateSupFeature(cmd,status,message):
     if status == "FINISHED_SUCCESS":
         print(rsp.toJson())
         print("======== Done =============")
-    client.publish("e",rsp.toJson(),1)
+    client.publish("e",rsp.toJson(),qos=1)
 
         
 def aknowledge(cmd):
