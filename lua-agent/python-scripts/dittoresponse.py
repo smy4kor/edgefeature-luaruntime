@@ -8,30 +8,24 @@ class DittoResponse:
         if responseCode:
             self.status = responseCode
 
-    def prepareAknowledgement(self,subscriptionInfo):
-        self.value = {
-            "thingId": subscriptionInfo.deviceId,
-            "policyId": subscriptionInfo.policyId
-        }
+    def prepareAknowledgement(self,dittoCorrelationId):
+        self.value = {}
         self.headers = {
             "response-required": False,
-            "reply-to": "command/" + subscriptionInfo.hubTenantId
+            "correlation-id": dittoCorrelationId
         }
     def prepareSupResponse(self,cmd,status,message):
         self.headers = {
             "response-required": False
         }
-        self.value = {}
-        self.value["properties"] = {}
-        self.value["properties"]["status"] = {}
-        self.value["properties"]["status"]["lastOperation"] = {
+        self.value = {
                         "status": status,
                         "message": message,
                         "correlationId": "98d52822-9dff-4126-a65d-d4c2f4d8d373",
                         "softwareModule": {
                             "name": "sw2",
                             "version": "1"
-                        }
+                }
         }
         
     def toJson(self):

@@ -19,7 +19,7 @@ def on_connect(client, userdata, flags, rc):
     # hint: to register as agent or operation status, use "e".
 
 def on_publish(client,userdata,result):
-    print("data published \n")
+    print("data published: " + str(result))
 
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
@@ -47,7 +47,8 @@ def handleSupEvent(cmd):
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
         updateSupFeature(cmd,"STARTED", "Received the request on the device.")
         print("request id is: " + str(cmd.getRequestId()))
-        print('Parsing software module information')
+        print("")
+        # print('Parsing software module information')
         for swMod in cmd.getSoftwareModules():
             # print(swMod.toJson())
             for art in swMod.artifacts:
@@ -59,7 +60,7 @@ def handleSupEvent(cmd):
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd,status,message):
     print(">>> sending sup update " + status + " with message: " + message)
-    pth = "/features/" + cmd.featureId
+    pth = "/features/" + cmd.featureId + "/properties/status/lastOperation"
     rsp = DittoResponse("com.peter2/aa-machine-1/things/twin/commands/modify",pth,None)
     rsp.prepareSupResponse(cmd,status,message)
     if status == "FINISHED_SUCCESS":
@@ -69,13 +70,15 @@ def updateSupFeature(cmd,status,message):
 
         
 def aknowledge(cmd):
-    print("======= Sending confirmation for tenant: " + sInfo.hubTenantId + "=============")
+    status = 200
+    mosquittoTopic = "command///res/" + str(cmd.getRequestId()) + "/" + str(status)
+    print("======== Sending aknowledgement for ditto requestId: %s =============" %(cmd.getRequestId()))
     aknPath = cmd.path.replace("inbox","outbox") ## "/features/manually-created-lua-agent/outbox/messages/install"
-    rsp = DittoResponse("com.peter2/aa-machine-1/things/twin/commands/modify",aknPath,200)
-    rsp.prepareAknowledgement(sInfo)
+    rsp = DittoResponse(cmd.dittoTopic,aknPath,status)
+    rsp.prepareAknowledgement(cmd.dittoCorrelationId)
     print(rsp.toJson())
-    client.publish("e",rsp.toJson())
-    print("======== Done =============")
+    client.publish(mosquittoTopic,rsp.toJson())
+    print("======== Done: Aknowledgement sent on topic %s =============" %(mosquittoTopic))
 
 
 client = mqtt.Client()
