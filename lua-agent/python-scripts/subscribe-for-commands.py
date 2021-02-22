@@ -43,8 +43,9 @@ def processEvent(msg):
 
 def handleSupEvent(cmd):
     cmd.printInfo()
-    aknowledge(cmd)
+
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
+        aknowledge(cmd)
         updateSupFeature(cmd,"STARTED", "Received the request on the device.")
         print("request id is: " + str(cmd.getRequestId()))
         print("")
@@ -60,8 +61,10 @@ def handleSupEvent(cmd):
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd,status,message):
     print(">>> sending sup update " + status + " with message: " + message)
-    pth = "/features/" + cmd.featureId + "/properties/status/lastOperation"
-    rsp = DittoResponse("com.peter2/aa-machine-1/things/twin/commands/modify",pth,None)
+    pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId);
+    
+    dittoRspTopic = "com.peter2/aa-machine-1/things/twin/commands/modify"
+    rsp = DittoResponse(dittoRspTopic,pth,None)
     rsp.prepareSupResponse(cmd,status,message)
     if status == "FINISHED_SUCCESS":
         print(rsp.toJson())
@@ -72,13 +75,13 @@ def updateSupFeature(cmd,status,message):
 def aknowledge(cmd):
     status = 200
     mosquittoTopic = "command///res/" + str(cmd.getRequestId()) + "/" + str(status)
-    print("======== Sending aknowledgement for ditto requestId: %s =============" %(cmd.getRequestId()))
+    # print("======== Sending aknowledgement for ditto requestId: %s =============" %(cmd.getRequestId()))
     aknPath = cmd.path.replace("inbox","outbox") ## "/features/manually-created-lua-agent/outbox/messages/install"
     rsp = DittoResponse(cmd.dittoTopic,aknPath,status)
     rsp.prepareAknowledgement(cmd.dittoCorrelationId)
-    print(rsp.toJson())
+    # print(rsp.toJson())
     client.publish(mosquittoTopic,rsp.toJson())
-    print("======== Done: Aknowledgement sent on topic %s =============" %(mosquittoTopic))
+    print("======== Aknowledgement sent on topic " + mosquittoTopic + " =============")
 
 
 client = mqtt.Client()

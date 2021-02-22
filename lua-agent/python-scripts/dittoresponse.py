@@ -16,7 +16,8 @@ class DittoResponse:
         }
     def prepareSupResponse(self,cmd,status,message):
         self.headers = {
-            "response-required": False
+            "response-required": False,
+            "content-type": "application/json"
         }
         self.value = {
                         "status": status,
