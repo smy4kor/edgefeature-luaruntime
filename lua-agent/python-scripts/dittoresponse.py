@@ -3,7 +3,7 @@ import json
 class DittoResponse:
     def __init__(self,topic,path,responseCode):
         self.topic = topic
-        self.path = path
+        self.path = path.replace("inbox","outbox")
         self.status = responseCode
     def prepareAknowledgement(self,subscriptionInfo):
         self.value = {

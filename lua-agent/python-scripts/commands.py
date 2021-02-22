@@ -22,6 +22,7 @@ class DittoCommand:
         self.path = payload['path']
         self.dittoCorrelationId = payload['headers']["correlation-id"]
         self.dittoOriginator = payload['headers']["ditto-originator"]
+        self.requestHeaders = payload['headers']
     def isSoftwareUpdate(self):
         return (self.isInstallCommand() or self.isDownloadCommand())
     def isInstallCommand(self):
