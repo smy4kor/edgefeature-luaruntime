@@ -43,19 +43,35 @@ def processEvent(msg):
 
 def handleSupEvent(cmd):
     cmd.printInfo()
+    aknowledge(cmd)
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
+        updateSupFeature(cmd,"STARTED", "Received the request on the device.")
         print("request id is: " + str(cmd.getRequestId()))
         print('Parsing software module information')
         for swMod in cmd.getSoftwareModules():
             # print(swMod.toJson())
             for art in swMod.artifacts:
+                updateSupFeature(cmd,"DOWNLOADING", "Downloading " + art.name)
                 DownloadManager().download(art)
-        aknowledge(cmd)
+                updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name)
+            updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name)
 
-                 
+# https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
+def updateSupFeature(cmd,status,message):
+    print(">>> sending sup update " + status + " with message: " + message)
+    pth = "/features/" + cmd.featureId
+    rsp = DittoResponse("com.peter2/aa-machine-1/things/twin/commands/modify",pth,None)
+    rsp.prepareSupResponse(cmd,status,message)
+    if status == "FINISHED_SUCCESS":
+        print(rsp.toJson())
+        print("======== Done =============")
+    client.publish("e",rsp.toJson())
+
+        
 def aknowledge(cmd):
     print("======= Sending confirmation for tenant: " + sInfo.hubTenantId + "=============")
-    rsp = DittoResponse("com.bosch.edge/demo/things/twin/commands/modify",cmd.path,200)
+    aknPath = cmd.path.replace("inbox","outbox") ## "/features/manually-created-lua-agent/outbox/messages/install"
+    rsp = DittoResponse("com.peter2/aa-machine-1/things/twin/commands/modify",aknPath,200)
     rsp.prepareAknowledgement(sInfo)
     print(rsp.toJson())
     client.publish("e",rsp.toJson())
