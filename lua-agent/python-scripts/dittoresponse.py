@@ -14,33 +14,18 @@ class DittoResponse:
             "response-required": False,
             "correlation-id": dittoCorrelationId
         }
-    def prepareSupResponse(self,agent,rolloutCorrelationId,status,message,swModule = None):
+    def prepareSupResponse(self,rolloutCorrelationId,status,message,swModule = None):
         self.headers = {
             "response-required": False,
             "content-type": "application/json"
         }
-        self.value = {}
-        self.value["definition"] =  [
-                "org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0"
-        ]
-        self.value["properties"] = {}
-        self.value["properties"]["status"] = {
-            "agentName": agent.name,
-            "agentVersion": agent.version,
-            "softwareModuleType": agent.type
+        self.value = {
+            "status": status,
+            "message": message,
+            "correlationId": rolloutCorrelationId
         }
-        self.value["properties"]["status"]["lastOperation"] = {
-                       "status": status,
-                        "message": message,
-                        "correlationId": rolloutCorrelationId,
-                        "softwareModule": {
-                            "name": "sw2",
-                            "version": "1"
-                        }
-        }
-
         if swModule:
-            self.value["properties"]["status"]["lastOperation"]["softwareModule"] = {
+            self.value["softwareModule"] = {
                 "name": swModule.name,
                 "version": swModule.version
             }
