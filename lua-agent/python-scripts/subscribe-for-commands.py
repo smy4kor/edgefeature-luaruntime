@@ -6,9 +6,12 @@ from commands import DittoCommand
 from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
 from dittoresponse import DittoResponse
+from agent import Agent
 
 sInfo = SubscriptionInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
+agent = Agent("lua","2.0.0","lua")
+
 MQTT_TOPIC = [(DEVICE_INFO_TOPIC, 0), ("command///req/#", 0)]
 
 
@@ -58,16 +61,15 @@ def handleSupEvent(cmd):
                 DownloadManager().download(art)
                 updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name,swMod)
             updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name,swMod)
-        updateSupFeature(cmd, "FINISHED_SUCCESS", "All software modules are installed")
 
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd,status,message,swModule = None):
     print(">>> sending sup update " + status + " with message: " + message)
-    pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId);
+    pth = "/features/{}".format(cmd.featureId);
     
     dittoRspTopic = "{}/{}/things/twin/commands/modify".format(sInfo.namespace,sInfo.deviceId)
     rsp = DittoResponse(dittoRspTopic,pth,None)
-    rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(),status,message,swModule)
+    rsp.prepareSupResponse(agent,cmd.getRolloutsCorrelationId(),status,message,swModule)
     if status == "FINISHED_SUCCESS":
         print(rsp.toJson())
         print("======== Done =============")
