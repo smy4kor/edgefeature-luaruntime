@@ -24,12 +24,19 @@ class DittoCommand:
         self.dittoOriginator = payload['headers']["ditto-originator"]
         self.requestHeaders = payload['headers']
         self.featureId = self.getFeatureId()
+        
+    def getRolloutsCorrelationId(self):
+        return self.payload['value']['correlationId']
+    
     def isSoftwareUpdate(self):
         return (self.isInstallCommand() or self.isDownloadCommand())
+    
     def isInstallCommand(self):
         return self.path.endswith('install')
+    
     def isDownloadCommand(self):
         return self.path.endswith('download')
+    
     def getRequestId(self):
         pattern = "req/(.*)/" ## everything between req/ and /install is the request id. Ex topic: command///req/01fp-pdid6m-12i8u431qmpi1b-1m2zqv2replies/install
         x = re.search(pattern, self.mqttTopic)

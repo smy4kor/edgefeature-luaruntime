@@ -48,24 +48,26 @@ def handleSupEvent(cmd):
         aknowledge(cmd)
         updateSupFeature(cmd,"STARTED", "Received the request on the device.")
         print("request id is: " + str(cmd.getRequestId()))
+        print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
         print("")
         # print('Parsing software module information')
         for swMod in cmd.getSoftwareModules():
             # print(swMod.toJson())
             for art in swMod.artifacts:
-                updateSupFeature(cmd,"DOWNLOADING", "Downloading " + art.name)
+                updateSupFeature(cmd,"DOWNLOADING", "Downloading " + art.name,swMod)
                 DownloadManager().download(art)
-                updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name)
-            updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name)
+                updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name,swMod)
+            updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name,swMod)
+        updateSupFeature(cmd, "FINISHED_SUCCESS", "All software modules are installed")
 
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
-def updateSupFeature(cmd,status,message):
+def updateSupFeature(cmd,status,message,swModule = None):
     print(">>> sending sup update " + status + " with message: " + message)
     pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId);
     
-    dittoRspTopic = "com.peter2/aa-machine-1/things/twin/commands/modify"
+    dittoRspTopic = "{}/{}/things/twin/commands/modify".format(sInfo.namespace,sInfo.deviceId)
     rsp = DittoResponse(dittoRspTopic,pth,None)
-    rsp.prepareSupResponse(cmd,status,message)
+    rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(),status,message,swModule)
     if status == "FINISHED_SUCCESS":
         print(rsp.toJson())
         print("======== Done =============")

@@ -14,20 +14,21 @@ class DittoResponse:
             "response-required": False,
             "correlation-id": dittoCorrelationId
         }
-    def prepareSupResponse(self,cmd,status,message):
+    def prepareSupResponse(self,rolloutCorrelationId,status,message,swModule = None):
         self.headers = {
             "response-required": False,
             "content-type": "application/json"
         }
         self.value = {
-                        "status": status,
-                        "message": message,
-                        "correlationId": "98d52822-9dff-4126-a65d-d4c2f4d8d373",
-                        "softwareModule": {
-                            "name": "sw2",
-                            "version": "1"
-                }
+            "status": status,
+            "message": message,
+            "correlationId": rolloutCorrelationId
         }
+        if swModule:
+            self.value["softwareModule"] = {
+                "name": swModule.name,
+                "version": swModule.version
+            }
         
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
