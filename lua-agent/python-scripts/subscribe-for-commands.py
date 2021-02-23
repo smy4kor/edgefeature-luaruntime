@@ -46,7 +46,6 @@ def handleSupEvent(cmd):
 
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
         aknowledge(cmd)
-        updateSupFeature(cmd,"STARTED", "Received the request on the device.")
         print("request id is: " + str(cmd.getRequestId()))
         print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
         print("")
@@ -58,7 +57,6 @@ def handleSupEvent(cmd):
                 DownloadManager().download(art)
                 updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name,swMod)
             updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name,swMod)
-        updateSupFeature(cmd, "FINISHED_SUCCESS", "All software modules are installed")
 
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd,status,message,swModule = None):
