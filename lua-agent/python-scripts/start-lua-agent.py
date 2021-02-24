@@ -5,6 +5,7 @@ import json
 from commands import DittoCommand
 from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
+from executor import LuaExecutor
 from dittoresponse import DittoResponse
 
 sInfo = SubscriptionInfo()
@@ -54,8 +55,12 @@ def handleSupEvent(cmd):
             # print(swMod.toJson())
             for art in swMod.artifacts:
                 updateSupFeature(cmd,"DOWNLOADING", "Downloading " + art.name,swMod)
-                DownloadManager().download(art)
+                filePath = DownloadManager().download(art)
                 updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name,swMod)
+                updateSupFeature(cmd,"INSTALLING", "Executing lua script: " + filePath,swMod)
+                execResult = LuaExecutor().execute(filePath)
+                updateSupFeature(cmd,"INSTALLED", execResult,swMod)
+                
             updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name,swMod)
 
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
