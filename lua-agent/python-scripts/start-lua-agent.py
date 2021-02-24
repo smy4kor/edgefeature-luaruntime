@@ -19,8 +19,10 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)
     # hint: to register as agent or operation status, use "e".
 
-def on_publish(client,userdata,result):
+
+def on_publish(client, userdata, result):
     print("data published: " + str(result))
+
 
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
@@ -42,6 +44,7 @@ def processEvent(msg):
         cmd = DittoCommand(payload, msg.topic)
         handleSupEvent(cmd)
 
+
 def handleSupEvent(cmd):
     cmd.printInfo()
 
@@ -55,38 +58,39 @@ def handleSupEvent(cmd):
             execResult = ""
             # print(swMod.toJson())
             for art in swMod.artifacts:
-                updateSupFeature(cmd,"DOWNLOADING", "Downloading " + art.name,swMod)
+                updateSupFeature(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
                 filePath = DownloadManager().download(art)
-                updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name,swMod)
-                updateSupFeature(cmd,"INSTALLING", "Executing lua script: " + filePath,swMod)
+                updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
+                updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
                 res = LuaExecutor().execute(filePath) + "\n"
-                updateSupFeature(cmd,"INSTALLED", execResult,swMod)
+                updateSupFeature(cmd, "INSTALLED", execResult, swMod)
                 execResult += res
-            updateSupFeature(cmd, "FINISHED_SUCCESS", execResult,swMod)
+            updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)
+
 
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
-def updateSupFeature(cmd,status,message,swModule = None):
+def updateSupFeature(cmd, status, message, swModule=None):
     print(">>> sending sup update " + status + " with message: " + message)
     pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId);
     
-    dittoRspTopic = "{}/{}/things/twin/commands/modify".format(sInfo.namespace,sInfo.deviceId)
-    rsp = DittoResponse(dittoRspTopic,pth,None)
-    rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(),status,message,swModule)
+    dittoRspTopic = "{}/{}/things/twin/commands/modify".format(sInfo.namespace, sInfo.deviceId)
+    rsp = DittoResponse(dittoRspTopic, pth, None)
+    rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(), status, message, swModule)
     if status == "FINISHED_SUCCESS":
         print(rsp.toJson())
         print("======== Done =============")
-    client.publish("e",rsp.toJson(),qos=1)
+    client.publish("e", rsp.toJson(), qos=1)
 
         
 def aknowledge(cmd):
     status = 200
     mosquittoTopic = "command///res/" + str(cmd.getRequestId()) + "/" + str(status)
     # print("======== Sending aknowledgement for ditto requestId: %s =============" %(cmd.getRequestId()))
-    aknPath = cmd.path.replace("inbox","outbox") ## "/features/manually-created-lua-agent/outbox/messages/install"
-    rsp = DittoResponse(cmd.dittoTopic,aknPath,status)
+    aknPath = cmd.path.replace("inbox", "outbox")  # # "/features/manually-created-lua-agent/outbox/messages/install"
+    rsp = DittoResponse(cmd.dittoTopic, aknPath, status)
     rsp.prepareAknowledgement(cmd.dittoCorrelationId)
     # print(rsp.toJson())
-    client.publish(mosquittoTopic,rsp.toJson())
+    client.publish(mosquittoTopic, rsp.toJson())
     print("======== Aknowledgement sent on topic " + mosquittoTopic + " =============")
 
 
