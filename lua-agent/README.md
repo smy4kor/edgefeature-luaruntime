@@ -25,7 +25,7 @@ sudo apt install python3-pip
 pip3 install paho-mqtt python-etcd
 pip3 install lupa
 ```
-- Run `python python-scripts/subscribe-for-commands.py`.
+- Run `python python-scripts/start-lua-agent.py`.
 - Open rollouts and assign a distributionSet to this device.
 
 # References
