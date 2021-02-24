@@ -52,16 +52,17 @@ def handleSupEvent(cmd):
         print("")
         # print('Parsing software module information')
         for swMod in cmd.getSoftwareModules():
+            execResult = ""
             # print(swMod.toJson())
             for art in swMod.artifacts:
                 updateSupFeature(cmd,"DOWNLOADING", "Downloading " + art.name,swMod)
                 filePath = DownloadManager().download(art)
                 updateSupFeature(cmd,"DOWNLOADED", "Downloaded " + art.name,swMod)
                 updateSupFeature(cmd,"INSTALLING", "Executing lua script: " + filePath,swMod)
-                execResult = LuaExecutor().execute(filePath)
+                res = LuaExecutor().execute(filePath) + "\n"
                 updateSupFeature(cmd,"INSTALLED", execResult,swMod)
-                
-            updateSupFeature(cmd, "FINISHED_SUCCESS", "Completed installing " + swMod.name,swMod)
+                execResult += res
+            updateSupFeature(cmd, "FINISHED_SUCCESS", execResult,swMod)
 
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd,status,message,swModule = None):
