@@ -62,7 +62,7 @@ def handleSupEvent(cmd):
                 filePath = DownloadManager().download(art)
                 updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
                 updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
-                res = LuaExecutor().execute(filePath) + "\n"
+                res = LuaExecutor().executeAsLuaFile(filePath) + "\n"
                 updateSupFeature(cmd, "INSTALLED", execResult, swMod)
                 execResult += res
             updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)

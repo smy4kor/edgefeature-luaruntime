@@ -28,6 +28,7 @@ Download the edge agent. Copy the device `provisioning.json` to the directory co
 
 ```
 yum -y install python3
+yum -y install lua5.1
 alias python=python3
 sudo apt install python3-pip
 pip3 install paho-mqtt python-etcd

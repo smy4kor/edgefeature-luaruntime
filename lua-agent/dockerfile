@@ -6,6 +6,7 @@ FROM python:3.9
 ## RUN sudo apt install python3-pip
 ## RUN pip3 install paho-mqtt python-etcd
 ## RUN pip3 install lupa
+## RUN sudo apt-get install lua5.1
 
 ### Add own Entrypoint Script, and other scripts dedicated for each use case of the agent ###
 COPY ./run.sh /run.sh
