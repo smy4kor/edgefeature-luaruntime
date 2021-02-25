@@ -7,14 +7,14 @@ import uuid
 
 class Agent:
 
-    def __init__(self, name, version, type):
+    def __init__(self, name, version, type,featureId):
         self.name = name
         self.version = version
         self.type = type
-        self.featureId = ""
-        self.check()
+        self.featureId = featureId
+        # self.generateRandomIdAndCache()
 
-    def check(self):
+    def generateRandomIdAndCache(self):
         # generate a feature id and cache it locally so that it can be later detected.
         filePath = self.getCachePath()
         if os.path.isfile(filePath):
