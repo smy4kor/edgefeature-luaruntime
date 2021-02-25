@@ -7,7 +7,9 @@ from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
 from executor import LuaExecutor
 from dittoresponse import DittoResponse
+from agent import Agent
 
+agent = Agent("lua","2.0.0","lua",'software-updatable-lua')
 sInfo = SubscriptionInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
 MQTT_TOPIC = [(DEVICE_INFO_TOPIC, 0), ("command///req/#", 0)]
@@ -27,6 +29,7 @@ def on_publish(client, userdata, result):
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
 def on_message(client, userdata, msg):
+    print("received message on mqtt topic: " + msg.topic)
     # try-catch will ensure that subscription is not broken in case of exception.
     try:
         processEvent(msg)
@@ -40,11 +43,14 @@ def processEvent(msg):
     payload = json.loads(payloadStr)
     if msg.topic == DEVICE_INFO_TOPIC:
         sInfo.compute(payload)
+        agent.register(client,sInfo)
+    elif msg.topic == "THING_REQUEST_TOPIC":
+        print("all features are \n",payload)
     else:
         cmd = DittoCommand(payload, msg.topic)
         handleSupEvent(cmd)
 
-
+    
 def handleSupEvent(cmd):
     cmd.printInfo()
 

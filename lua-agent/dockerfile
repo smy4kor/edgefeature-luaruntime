@@ -12,7 +12,6 @@ FROM python:3.9
 COPY ./run.sh /run.sh
 COPY ./python-scripts /python-scripts
 
-RUN chmod +x /python-scripts/register-agent.py 
 RUN chmod +x /python-scripts/start-lua-agent.py
 
 

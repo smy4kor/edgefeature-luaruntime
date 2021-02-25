@@ -10,22 +10,6 @@ Download the edge agent. Copy the device `provisioning.json` to the directory co
 
 ### 2.1 Manual Approach
 
-- Manually create a [software updatable](https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0) lua feature in iot-things as shown below. This step will be automated soon.
-
-```json
-    "feature-id-here": {
-            "definition": [
-                "org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0"
-            ],
-            "properties": {
-                "status": {
-                    "agentName": "lua",
-                    "agentVersion": "2.0.0",
-                    "softwareModuleType": "lua"
-                }
-            }
-        }
-```
 - Install the following prerequisites.
 
 ```
@@ -34,7 +18,6 @@ yum -y install lua5.1
 alias python=python3
 sudo apt install python3-pip
 pip3 install paho-mqtt python-etcd
-pip3 install lupa
 ```
 - Run `python python-scripts/start-lua-agent.py`.
 

@@ -3,7 +3,7 @@ import os.path
 import json
 from json import JSONEncoder
 import uuid
-
+from dittoresponse import DittoResponse
 
 class Agent:
 
@@ -38,3 +38,18 @@ class Agent:
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
     
+    def register(self,mqttClient,subscriptionInfo):
+        dittoRspTopic = "{}/{}/things/twin/commands/modify".format(subscriptionInfo.namespace, subscriptionInfo.deviceId)
+        value = {}
+        value["definition"] = ["org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0"]
+        value["properties"] = {}
+        value["properties"]["status"]= {
+            "agentName": self.name,
+            "agentVersion": self.version,
+            "softwareModuleType": self.type
+        }
+        path = "/features/" + self.featureId
+        rsp = DittoResponse(dittoRspTopic, path, None)
+        
+        rsp.value = value
+        mqttClient.publish("e", rsp.toJson(), qos=1)
