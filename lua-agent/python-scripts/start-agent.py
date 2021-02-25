@@ -5,11 +5,11 @@ import json
 from commands import DittoCommand
 from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
-from executor import LuaExecutor
+from executor import ScriptExecutor
 from dittoresponse import DittoResponse
 from agent import Agent
 
-agent = Agent("lua","2.0.0","lua",'software-updatable-lua')
+agent = Agent("script","2.0.0","script",'software-updatable-script-agent')
 sInfo = SubscriptionInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
 MQTT_TOPIC = [(DEVICE_INFO_TOPIC, 0), ("command///req/#", 0)]
@@ -54,7 +54,7 @@ def processEvent(msg):
 def handleSupEvent(cmd):
     cmd.printInfo()
 
-    if cmd.isInstallCommand() and cmd.isSoftwareUpdate():
+    if cmd.isInstallCommand() and cmd.isSoftwareUpdate() and cmd.featureId == agent.featureId:
         aknowledge(cmd)
         print("request id is: " + str(cmd.getRequestId()))
         print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
@@ -68,7 +68,7 @@ def handleSupEvent(cmd):
                 filePath = DownloadManager().download(art)
                 updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
                 updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
-                res = LuaExecutor().executeAsLuaFile(filePath) + "\n"
+                res = ScriptExecutor().executeAsLuaFile(filePath) + "\n"
                 updateSupFeature(cmd, "INSTALLED", execResult, swMod)
                 execResult += res
             updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)

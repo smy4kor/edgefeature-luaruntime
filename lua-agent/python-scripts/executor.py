@@ -1,12 +1,8 @@
 import os
 import urllib.request
-import lupa
 import subprocess
-from lupa import LuaRuntime
-lua = LuaRuntime(unpack_returned_tuples=True)
 
-
-class LuaExecutor:
+class ScriptExecutor:
 
     def executeAsString(self, filePath):
         luaScriptStr = open(filePath, 'r').read()
