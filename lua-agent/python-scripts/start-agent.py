@@ -8,8 +8,9 @@ from downloader import DownloadManager
 from executor import ScriptExecutor
 from dittoresponse import DittoResponse
 from agent import Agent
+from softwareFeatureCache import SoftwareFeatureCache
 
-agent = Agent("script","2.0.0","script",'software-updatable-script-agent')
+agent = Agent("script", "2.0.0", "script", 'software-updatable-script-agent')
 sInfo = SubscriptionInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
 MQTT_TOPIC = [(DEVICE_INFO_TOPIC, 0), ("command///req/#", 0)]
@@ -43,9 +44,9 @@ def processEvent(msg):
     payload = json.loads(payloadStr)
     if msg.topic == DEVICE_INFO_TOPIC:
         sInfo.compute(payload)
-        agent.register(client,sInfo)
+        agent.register(client, sInfo)
     elif msg.topic == "THING_REQUEST_TOPIC":
-        print("all features are \n",payload)
+        print("all features are \n", payload)
     else:
         cmd = DittoCommand(payload, msg.topic)
         handleSupEvent(cmd)
@@ -61,27 +62,34 @@ def handleSupEvent(cmd):
         print("command received on unknown feature: " + str(cmd.featureId))   
         # else, from cache file stored with cmd.featureId and execute the scripts stored there
 
+
 def handleRolloutRequest(cmd):
     print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
     # print('Parsing software module information')
     for swMod in cmd.getSoftwareModules():
         execResult = ""
+        featureId = swMod.name.replace(":", "-") + "-" + swMod.version
+        swCache = SoftwareFeatureCache.loadOrCreate(featureId);
         # print(swMod.toJson())
         for art in swMod.artifacts:
             updateSupFeature(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
             filePath = DownloadManager().download(art)
+            swCache.files.append(filePath)
             updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
-            ## https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
+            # # https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
             updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
             res = ScriptExecutor().executeFile(filePath) + "\n"
             updateSupFeature(cmd, "INSTALLED", execResult, swMod)
             execResult += res
+        swCache.save()
+        swCache.createDittoFeature(client, sInfo, execResult)
         updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)   
+
     
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd, status, message, swModule=None):
     print(">>> sending sup update " + status + " with message: " + message)
-    pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId);
+    pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId)
     
     dittoRspTopic = "{}/{}/things/twin/commands/modify".format(sInfo.namespace, sInfo.deviceId)
     rsp = DittoResponse(dittoRspTopic, pth, None)
