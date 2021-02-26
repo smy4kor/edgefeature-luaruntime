@@ -52,9 +52,9 @@ def processEvent(msg):
 
     
 def handleSupEvent(cmd):
-    cmd.printInfo()
+    # cmd.printInfo()
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate() and cmd.featureId == agent.featureId:
-        print("request id is: " + str(cmd.getRequestId()))
+        print("processing rollouts request with ditto req id: " + str(cmd.getRequestId()))
         aknowledge(cmd)
         handleRolloutRequest(cmd)
     else:

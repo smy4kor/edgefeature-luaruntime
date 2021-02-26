@@ -4,19 +4,23 @@ import subprocess
 
 class ScriptExecutor:
 
-    def executeAsString(self, filePath):
-        luaScriptStr = open(filePath, 'r').read()
-        executorFunc = lua.eval(luaScriptStr)
-        return executorFunc()
-
     def executeFile(self, filePath):
-        print("execution path is: " + filePath)
-        execRes = self.executeLinuxCommands(["lua", filePath])
+        type = self.getExecutorType(filePath)
+        print("executing '{}' command on file '{}'".format(type, filePath))
+        execRes = self.executeLinuxCommands([type, filePath])
         res = ""
         for line in execRes:
             if(line):
                 res += line
         return res
+
+    def getExecutorType(self,filePath):
+        if filePath.endswith(".lua"):
+            return "lua"
+        elif filePath.endswith(".py"):
+            return "python3"
+        elif filePath.endswith(".sh"):
+            return "bash"
 
     def executeLinuxCommands(self, bashCommands):
         popen = subprocess.Popen(bashCommands, stdout=subprocess.PIPE, universal_newlines=True)
