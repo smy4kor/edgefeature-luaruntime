@@ -4,15 +4,19 @@ import subprocess
 
 class ScriptExecutor:
 
-    def executeFile(self, filePath):
-        type = self.getExecutorType(filePath)
-        print("executing '{}' command on file '{}'".format(type, filePath))
-        execRes = self.executeLinuxCommands([type, filePath])
-        res = ""
-        for line in execRes:
-            if(line):
-                res += line
-        return res
+    def executeFile(self, filePath)-> str:
+        try:
+            type = self.getExecutorType(filePath)
+            print("executing '{}' command on file '{}'".format(type, filePath))
+            execRes = self.executeLinuxCommands([type, filePath])
+            res = ""
+            for line in execRes:
+                if(line):
+                    res += line
+            return res
+        except:
+          return "An exception occurred while executing" + filePath
+
 
     def getExecutorType(self,filePath):
         if filePath.endswith(".lua"):

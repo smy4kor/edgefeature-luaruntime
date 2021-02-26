@@ -33,7 +33,7 @@ class SoftwareFeatureCache:
         mqttClient.publish("e", rsp.toJson(), qos=1)
 
     @staticmethod
-    def loadOrCreate(featureId):
+    def loadOrCreate(featureId: str):
         if SoftwareFeatureCache.hasCache(featureId) == False:
             return SoftwareFeatureCache(featureId)
         else:
