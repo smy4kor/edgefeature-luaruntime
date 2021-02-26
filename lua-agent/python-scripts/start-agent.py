@@ -53,27 +53,31 @@ def processEvent(msg):
     
 def handleSupEvent(cmd):
     cmd.printInfo()
-
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate() and cmd.featureId == agent.featureId:
-        aknowledge(cmd)
         print("request id is: " + str(cmd.getRequestId()))
-        print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
-        print("")
-        # print('Parsing software module information')
-        for swMod in cmd.getSoftwareModules():
-            execResult = ""
-            # print(swMod.toJson())
-            for art in swMod.artifacts:
-                updateSupFeature(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
-                filePath = DownloadManager().download(art)
-                updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
-                updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
-                res = ScriptExecutor().executeAsLuaFile(filePath) + "\n"
-                updateSupFeature(cmd, "INSTALLED", execResult, swMod)
-                execResult += res
-            updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)
+        aknowledge(cmd)
+        handleRolloutRequest(cmd)
+    else:
+        print("command received on unknown feature: " + str(cmd.featureId))   
+        # else, from cache file stored with cmd.featureId and execute the scripts stored there
 
-
+def handleRolloutRequest(cmd):
+    print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
+    # print('Parsing software module information')
+    for swMod in cmd.getSoftwareModules():
+        execResult = ""
+        # print(swMod.toJson())
+        for art in swMod.artifacts:
+            updateSupFeature(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
+            filePath = DownloadManager().download(art)
+            updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
+            ## https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
+            updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
+            res = ScriptExecutor().executeFile(filePath) + "\n"
+            updateSupFeature(cmd, "INSTALLED", execResult, swMod)
+            execResult += res
+        updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)   
+    
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
 def updateSupFeature(cmd, status, message, swModule=None):
     print(">>> sending sup update " + status + " with message: " + message)

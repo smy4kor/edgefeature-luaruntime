@@ -9,7 +9,7 @@ class ScriptExecutor:
         executorFunc = lua.eval(luaScriptStr)
         return executorFunc()
 
-    def executeAsLuaFile(self, filePath):
+    def executeFile(self, filePath):
         print("execution path is: " + filePath)
         execRes = self.executeLinuxCommands(["lua", filePath])
         res = ""
