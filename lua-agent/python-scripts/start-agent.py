@@ -45,7 +45,9 @@ def processEvent(msg):
     if msg.topic == DEVICE_INFO_TOPIC:
         sInfo.compute(payload)
         agent.register(client, sInfo)
+        print("======== Agent is ready =============")
     elif msg.topic == "THING_REQUEST_TOPIC":
+        # added this for the sake of example. We do not make any query that results in receiving a message on this topic.
         print("all features are \n", payload)
     else:
         cmd = DittoCommand(payload, msg.topic)
@@ -60,11 +62,13 @@ def handleSupEvent(cmd):
         handleRolloutRequest(cmd)
     elif SoftwareFeatureCache.hasCache(cmd.featureId):
         print("Need to re-execute " + cmd.featureId)
-        aknowledge(cmd)
-        reExecuteSoftware(cmd.featureId)
+        execRes = reExecuteSoftware(cmd.featureId)
+        val = { "executionResult": execRes}
+        aknowledge(cmd, value=execRes)
     else:
         print("command received on unknown feature: " + str(cmd.featureId))   
         # else, from cache file stored with cmd.featureId and execute the scripts stored there
+
 
 def reExecuteSoftware(featureId):
     swCache = SoftwareFeatureCache.loadOrCreate(featureId);
@@ -72,6 +76,8 @@ def reExecuteSoftware(featureId):
     for file in swCache.files:
         execResult += ScriptExecutor().executeFile(file) + "\n"
     swCache.createDittoFeature(client, sInfo, execResult)
+    return execResult
+
 
 def handleRolloutRequest(cmd):
     print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
@@ -110,13 +116,15 @@ def updateSupFeature(cmd, status, message, swModule=None):
     client.publish("e", rsp.toJson(), qos=1)
 
         
-def aknowledge(cmd):
+def aknowledge(cmd, value=None):
     status = 200
     mosquittoTopic = "command///res/" + str(cmd.getRequestId()) + "/" + str(status)
     # print("======== Sending aknowledgement for ditto requestId: %s =============" %(cmd.getRequestId()))
     aknPath = cmd.path.replace("inbox", "outbox")  # # "/features/manually-created-lua-agent/outbox/messages/install"
     rsp = DittoResponse(cmd.dittoTopic, aknPath, status)
     rsp.prepareAknowledgement(cmd.dittoCorrelationId)
+    if value:
+        rsp.value = value
     # print(rsp.toJson())
     client.publish(mosquittoTopic, rsp.toJson())
     print("======== Aknowledgement sent on topic " + mosquittoTopic + " =============")

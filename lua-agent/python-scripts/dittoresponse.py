@@ -12,7 +12,8 @@ class DittoResponse:
         self.value = {}
         self.headers = {
             "response-required": False,
-            "correlation-id": dittoCorrelationId
+            "correlation-id": dittoCorrelationId,
+            "content-type": "application/json"
         }
     def prepareSupResponse(self,rolloutCorrelationId,status,message,swModule = None):
         self.headers = {
