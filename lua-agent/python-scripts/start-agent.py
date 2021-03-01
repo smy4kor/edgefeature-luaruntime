@@ -58,10 +58,20 @@ def handleSupEvent(cmd):
         print("processing rollouts request with ditto req id: " + str(cmd.getRequestId()))
         aknowledge(cmd)
         handleRolloutRequest(cmd)
+    elif SoftwareFeatureCache.hasCache(cmd.featureId):
+        print("Need to re-execute " + cmd.featureId)
+        aknowledge(cmd)
+        reExecuteSoftware(cmd.featureId)
     else:
         print("command received on unknown feature: " + str(cmd.featureId))   
         # else, from cache file stored with cmd.featureId and execute the scripts stored there
 
+def reExecuteSoftware(featureId):
+    swCache = SoftwareFeatureCache.loadOrCreate(featureId);
+    execResult = ""
+    for file in swCache.files:
+        execResult += ScriptExecutor().executeFile(file) + "\n"
+    swCache.createDittoFeature(client, sInfo, execResult)
 
 def handleRolloutRequest(cmd):
     print("Rollouts correlationId is: " + str(cmd.getRolloutsCorrelationId()))
