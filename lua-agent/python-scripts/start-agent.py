@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import paho.mqtt.client as mqtt
 import time
 import json
@@ -31,7 +30,7 @@ def on_publish(client, userdata, result):
 # msg is of type MQTTMessage
 def on_message(client, userdata, msg):
     print("received message on mqtt topic: " + msg.topic)
-    # try-catch will ensure that subscription is not broken in case of exception.
+    # try-catch will ensure that subscription is not broken in case of any unhandled exception.
     try:
         processEvent(msg)
     except Exception as err:
@@ -42,13 +41,12 @@ def processEvent(msg):
     '''Will process the mqtt message based on the use case. Usecase is determined by the message topic.'''
     payloadStr = str(msg.payload.decode("utf-8", "ignore"))
     payload = json.loads(payloadStr)
-    if msg.topic == DEVICE_INFO_TOPIC:
+    if msg.topic == "command///req//modified" or msg.topic == "command///req//deleted":
+        print("Ignoring the message as this agent is not responsible for handling them")
+    elif msg.topic == DEVICE_INFO_TOPIC:
         sInfo.compute(payload)
         agent.register(client, sInfo)
         print("======== Agent is ready =============")
-    elif msg.topic == "THING_REQUEST_TOPIC":
-        # added this for the sake of example. We do not make any query that results in receiving a message on this topic.
-        print("all features are \n", payload)
     else:
         cmd = DittoCommand(payload, msg.topic)
         handleSupEvent(cmd)
@@ -90,7 +88,7 @@ def handleRolloutRequest(cmd):
         for art in swMod.artifacts:
             updateSupFeature(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
             filePath = DownloadManager().download(art)
-            swCache.files.append(filePath)
+            swCache.addFile(filePath)
             updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
             # # https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
             updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
@@ -111,7 +109,6 @@ def updateSupFeature(cmd, status, message, swModule=None):
     rsp = DittoResponse(dittoRspTopic, pth, None)
     rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(), status, message, swModule)
     if status == "FINISHED_SUCCESS":
-        print(rsp.toJson())
         print("======== Done =============")
     client.publish("e", rsp.toJson(), qos=1)
 
@@ -125,7 +122,7 @@ def aknowledge(cmd, value=None):
     rsp.prepareAknowledgement(cmd.dittoCorrelationId)
     if value:
         rsp.value = value
-    # print(rsp.toJson())
+
     client.publish(mosquittoTopic, rsp.toJson())
     print("======== Aknowledgement sent on topic " + mosquittoTopic + " =============")
 

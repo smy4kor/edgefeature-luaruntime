@@ -45,7 +45,11 @@ class SoftwareFeatureCache:
             cache.files = a["files"]
             print('loading from cache: ' + cache.toJson())
             return cache;
-            
+
+    def addFile(self,filePath):
+        if (filePath in self.files) == False:
+            self.files.append(filePath)
+           
     def save(self):
         filePath = SoftwareFeatureCache.getCachePath(self.featureId)
         f = open(filePath,"w+")
