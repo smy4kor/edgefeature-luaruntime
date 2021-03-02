@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import json
 from commands import DittoCommand
-from subscriptioninfo import SubscriptionInfo
+from subscription_info import SubscriptionInfo
 from downloader import DownloadManager
 from executor import ScriptExecutor
 from ditto_response import DittoResponse
