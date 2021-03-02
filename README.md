@@ -48,13 +48,21 @@ This approach is not tested. Below are some steps that could be used to achieve 
 - Create a distribution set from this software module and assign it to the device. Observe the action history.
 - You can also re-execute the scripts from the [Iot Manager UI](https://console.manager.eu-1.bosch-iot-suite.com/ui). 
 
-# 4. References
+## 3.1 Limitation
+If you delete an artifact on the rollouts, you must also manually update the cache file created by this agent on the device. To know where the cache is created, please [see here](./script-agent/src/softwareFeatureCache.py).
+
+# 4. Clean up
+If you wish to clean up the runtime, here are the steps.
+- Delete the cache folder containing the artifacts associated with a feature id.
+- Delete all the features created by this agent on the IoT-Things.
+
+# 5. References
 * [Registering a device](https://docs.bosch-iot-suite.com/device-management/Register-a-device-via-the-Bosch-IoT-Manager-UI.html).
 * [Install and manage the Edge Agent](https://docs.bosch-iot-suite.com/edge/index.html#109641.htm)
 * [Ditto protocol](https://www.eclipse.org/ditto/1.5/protocol-specification-things-create-or-modify.html)
 * [Software updatable integration suite](https://docs.bosch-iot-suite.com/device-management/SoftwareUpdatable-feature-detailed-specification-and-integration-guide.html).
 
-# 5. Useful Snippets
+# 6. Useful Snippets
 
 This agent does not use all concepts from ditto or edge device. So below you find some useful snippets that can be used on the device side if you wish to extend or improve this agent.
 

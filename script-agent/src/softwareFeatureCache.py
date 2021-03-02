@@ -8,7 +8,7 @@ from datetime import datetime
 
 # Creates a file on the device which contains a list of artifact file paths associated with a feature id.
 class SoftwareFeatureCache:
-    DIR = os.getcwd() + "/software-feature-cache/"
+    CACHE_DIRECTORY = os.getcwd() + "/software-feature-cache/"
     def __init__(self,featureId):
         self.featureId = featureId
         self.files = []
@@ -63,7 +63,7 @@ class SoftwareFeatureCache:
     
     @staticmethod 
     def getCachePath(featureId):
-        dir = SoftwareFeatureCache.DIR
+        dir = SoftwareFeatureCache.CACHE_DIRECTORY
         if os.path.isdir(dir) == False:
             os.mkdir(dir)
         return dir + featureId + ".json"
