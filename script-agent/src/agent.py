@@ -6,39 +6,28 @@ import uuid
 from dittoresponse import DittoResponse
 
 class Agent:
+    """An entity that represents a Software Updatable agent."""
 
     def __init__(self, name, version, type,featureId):
         self.name = name
         self.version = version
         self.type = type
         self.featureId = featureId
-        # self.generateRandomIdAndCache()
-
-    def generateRandomIdAndCache(self):
-        # generate a feature id and cache it locally so that it can be later detected.
-        filePath = self.getCachePath()
-        if os.path.isfile(filePath):
-            f = open(filePath, "r")
-            self.featureId = json.loads(f.read())["featureId"]
-            f.close()
-            print ("Agent cache exist with feature id",self.featureId)
-        else:
-            self.featureId = str(uuid.uuid4())
-            f = open(filePath,"w+")
-            f.writelines(self.toJson())
-            f.close()
-            print ("Created agent cache with feature id",self.featureId)
-
-    def getCachePath(self):
-        dir = os.getcwd() + "/agent-feature-cache/"
-        if os.path.isdir(dir) == False:
-            os.mkdir(dir)
-        return os.getcwd() + "/agent-feature-cache/" + self.name + ":" + self.version + ".json"
 
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
     
     def register(self,mqttClient,subscriptionInfo):
+        """Registers this agent as a feature in IoT-THings
+    
+        Parameters
+        ----------
+        mqttClient : paho.mqtt.client
+            The mqtt client that has the connection to the local mosquitto provided by the edge device.
+        subscriptionInfo : SubscriptionInfo
+            Information of this device in the context of its subscription.
+        """
+        
         dittoRspTopic = "{}/{}/things/twin/commands/modify".format(subscriptionInfo.namespace, subscriptionInfo.deviceId)
         value = {}
         value["definition"] = ["org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0"]
