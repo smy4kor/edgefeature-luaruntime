@@ -1,5 +1,5 @@
 function brewBeans()
-  -- printing the result is good enough to refresh the result on rollouts UI
+  -- printing the result is good enough to display the result on Rollouts UI or Iot-Manager action dialog.
 	print('beans are brewed')
 end
             

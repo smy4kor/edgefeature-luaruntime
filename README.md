@@ -19,7 +19,8 @@ pip3 install paho-mqtt python-etcd
 - Run `python python-scripts/start-agent.py`.
 
 ### 2.2 Running as a docker container
-This approach is not tested. 
+This approach is not tested. Below are some steps that could be used to achieve this.
+
 * Modify `python-scripts/start-agent.py` to use `ctrhost` as mosquitto host. Ex: ```client.connect("ctrhost", 1883)```
 * Build the dockerfile and push the image to a repository which is publically available.
 * Please see [how to deploy a container](https://docs.bosch-iot-suite.com/edge/index.html#109664.htm). It describes how to remotely trigger installation of containers on gateways in the form of Software Updates from Bosch IoT Suite Rollouts service.
@@ -38,11 +39,14 @@ This approach is not tested.
    }
 }
 ```
+* Please Note: The scripts must be executed in the host and not inside the container.
 
 # 3. Performing a software update
-- Create a software module and distribution set of type `lua`.
-- Use some of the [example sample lua scripts](./demo-lua-scripts/) as the artifacts.
-- Assign the distribution set to this device. Observe the action history.
+- Login to the [Rollouts UI](https://console.eu1.bosch-iot-rollouts.com/).
+- Navigate to `Distributions` tab and create a software module of type `script`.
+- Upload a `shell`, or `python` or `lua` script as an artifact. There are few sample script [here](./demo-lua-scripts/).
+- Create a distribution set from this software module and assign it to the device. Observe the action history.
+- You can also re-execute the scripts from the [Iot Manager UI](https://console.manager.eu-1.bosch-iot-suite.com/ui). 
 
 # 4. References
 * [Registering a device](https://docs.bosch-iot-suite.com/device-management/Register-a-device-via-the-Bosch-IoT-Manager-UI.html).
@@ -51,12 +55,15 @@ This approach is not tested.
 * [Software updatable integration suite](https://docs.bosch-iot-suite.com/device-management/SoftwareUpdatable-feature-detailed-specification-and-integration-guide.html).
 
 # 5. Useful Snippets
-#### Get feature by definition
+
+This agent does not use all concepts from ditto or edge device. So below you find some useful snippets that can be used on the device side if you wish to extend or improve this agent.
+
+#### Get ditto feature by definition
 
 ```
 def getFeatureByAgentId():
     # see https://www.eclipse.org/ditto/1.5/protocol-examples-retrievefeature.html
-    # "topic": "com.acme/xdk_53/things/twin/commands/retrieve",
+    # "topic": "namespace/device-id/things/twin/commands/retrieve",
     print("Request all features available in iot-things")
     pth = "/features/{}".format(agent.featureId);
     topic = "{}/{}/things/twin/commands/retrieve".format(sInfo.namespace, sInfo.deviceId)
