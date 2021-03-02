@@ -5,9 +5,9 @@ from commands import DittoCommand
 from subscriptioninfo import SubscriptionInfo
 from downloader import DownloadManager
 from executor import ScriptExecutor
-from dittoresponse import DittoResponse
+from ditto_response import DittoResponse
 from agent import Agent
-from softwareFeatureCache import SoftwareFeatureCache
+from software_feature_cache import SoftwareFeatureCache
 
 agent = Agent("script", "2.0.0", "script", 'software-updatable-script-agent')
 sInfo = SubscriptionInfo()

@@ -1,6 +1,8 @@
 import json
 
 class DittoResponse:
+    """A utility class that is responsible for generating response messages according to the ditto protocol."""
+    
     def __init__(self,topic,path,responseCode):
         self.topic = topic
         self.path = path.replace("inbox","outbox") ## "/features/manually-created-lua-agent/outbox/messages/install"

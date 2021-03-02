@@ -12,8 +12,8 @@
 *.out
 
 # Cache directories
-lua-agent/examples
-lua-agent/python-scripts/__pycache__
+script-agent/examples
+script-agent/src/__pycache__
 .project
 
 # IDEs and editors

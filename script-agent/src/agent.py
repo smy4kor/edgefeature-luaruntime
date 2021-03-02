@@ -3,7 +3,7 @@ import os.path
 import json
 from json import JSONEncoder
 import uuid
-from dittoresponse import DittoResponse
+from ditto_response import DittoResponse
 
 class Agent:
     """An entity that represents a Software Updatable agent."""

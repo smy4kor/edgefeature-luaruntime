@@ -3,7 +3,7 @@ import os.path
 import json
 from json import JSONEncoder
 import uuid
-from dittoresponse import DittoResponse
+from ditto_response import DittoResponse
 from datetime import datetime
 
 # Creates a file on the device which contains a list of artifact file paths associated with a feature id.
