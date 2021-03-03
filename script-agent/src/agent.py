@@ -17,18 +17,18 @@ class Agent:
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
     
-    def register(self,mqttClient,subscriptionInfo):
+    def register(self,mqttClient,deviceInfo):
         """Registers this agent as a feature in IoT-THings
     
         Parameters
         ----------
         mqttClient : paho.mqtt.client
             The mqtt client that has the connection to the local mosquitto provided by the edge device.
-        subscriptionInfo : SubscriptionInfo
+        deviceInfo : DeviceInfo
             Information of this device in the context of its subscription.
         """
         
-        dittoRspTopic = "{}/{}/things/twin/commands/modify".format(subscriptionInfo.namespace, subscriptionInfo.deviceId)
+        dittoRspTopic = "{}/{}/things/twin/commands/modify".format(deviceInfo.namespace, deviceInfo.deviceId)
         value = {}
         value["definition"] = ["org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0"]
         value["properties"] = {}

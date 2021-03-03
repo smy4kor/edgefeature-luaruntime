@@ -16,8 +16,8 @@ class SoftwareFeatureCache:
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
     
-    def createDittoFeature(self,mqttClient,subscriptionInfo,executionResult):
-        dittoRspTopic = "{}/{}/things/twin/commands/modify".format(subscriptionInfo.namespace, subscriptionInfo.deviceId)
+    def createDittoFeature(self,mqttClient,deviceInfo,executionResult):
+        dittoRspTopic = "{}/{}/things/twin/commands/modify".format(deviceInfo.namespace, deviceInfo.deviceId)
         value = {}
         # https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
         value["definition"] = ["vorto.private.test:Executor:1.0.0"]

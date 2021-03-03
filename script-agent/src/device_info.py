@@ -1,6 +1,6 @@
 import json
 
-class SubscriptionInfo:
+class DeviceInfo:
     """An entity that represents the information provided by edge agent over edge/thing/response topic."""
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

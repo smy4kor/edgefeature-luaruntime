@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import json
 from commands import DittoCommand
-from subscription_info import SubscriptionInfo
+from device_info import DeviceInfo
 from downloader import DownloadManager
 from executor import ScriptExecutor
 from ditto_response import DittoResponse
@@ -10,7 +10,7 @@ from agent import Agent
 from software_feature_cache import SoftwareFeatureCache
 
 agent = Agent("script", "2.0.0", "script", 'software-updatable-script-agent')
-sInfo = SubscriptionInfo()
+deviceInfo = DeviceInfo()
 DEVICE_INFO_TOPIC = "edge/thing/response"
 MQTT_TOPIC = [(DEVICE_INFO_TOPIC, 0), ("command///req/#", 0)]
 
@@ -44,8 +44,8 @@ def processEvent(msg):
     if msg.topic == "command///req//modified" or msg.topic == "command///req//deleted":
         print("Ignoring the message as this agent is not responsible for handling them")
     elif msg.topic == DEVICE_INFO_TOPIC:
-        sInfo.compute(payload)
-        agent.register(client, sInfo)
+        deviceInfo.compute(payload)
+        agent.register(client, deviceInfo)
         print("======== Agent is ready =============")
     else:
         cmd = DittoCommand(payload, msg.topic)
@@ -73,7 +73,7 @@ def executeSoftware(featureId):
     execResult = ""
     for file in swCache.files:
         execResult += ScriptExecutor().executeFile(file) + "\n"
-    swCache.createDittoFeature(client, sInfo, execResult)
+    swCache.createDittoFeature(client, deviceInfo, execResult)
     return execResult
 
 
@@ -96,7 +96,7 @@ def handleRolloutRequest(cmd):
             updateSupFeature(cmd, "INSTALLED", execResult, swMod)
             execResult += res
         swCache.save()
-        swCache.createDittoFeature(client, sInfo, execResult)
+        swCache.createDittoFeature(client, deviceInfo, execResult)
         updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)   
 
     
@@ -105,7 +105,7 @@ def updateSupFeature(cmd, status, message, swModule=None):
     print(">>> sending sup update " + status + " with message: " + message)
     pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId)
     
-    dittoRspTopic = "{}/{}/things/twin/commands/modify".format(sInfo.namespace, sInfo.deviceId)
+    dittoRspTopic = "{}/{}/things/twin/commands/modify".format(deviceInfo.namespace, deviceInfo.deviceId)
     rsp = DittoResponse(dittoRspTopic, pth, None)
     rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(), status, message, swModule)
     if status == "FINISHED_SUCCESS":
