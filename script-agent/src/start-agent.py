@@ -28,6 +28,8 @@ def on_publish(client, userdata, result):
 
 # The callback when a install or download command is received
 # msg is of type MQTTMessage
+
+
 def on_message(client, userdata, msg):
     print("received message on mqtt topic: " + msg.topic)
     # try-catch will ensure that subscription is not broken in case of any unhandled exception.
@@ -50,8 +52,8 @@ def processEvent(msg):
     else:
         cmd = DittoCommand(payload, msg.topic)
         handleSupEvent(cmd)
+ 
 
-    
 def handleSupEvent(cmd):
     # cmd.printInfo()
     if cmd.isInstallCommand() and cmd.isSoftwareUpdate() and cmd.featureId == agent.featureId:
@@ -67,13 +69,12 @@ def handleSupEvent(cmd):
         print("command received on unknown feature: " + str(cmd.featureId))   
         # else, from cache file stored with cmd.featureId and execute the scripts stored there
 
-
 def executeSoftware(featureId):
     swCache = SoftwareFeatureCache.loadOrCreate(featureId);
     execResult = ""
     for file in swCache.files:
         execResult += ScriptExecutor().executeFile(file) + "\n"
-    swCache.createDittoFeature(client, deviceInfo, execResult)
+    swCache.updateDittoFeature(client, deviceInfo, execResult)
     return execResult
 
 
@@ -86,22 +87,22 @@ def handleRolloutRequest(cmd):
         swCache = SoftwareFeatureCache.loadOrCreate(featureId);
         # print(swMod.toJson())
         for art in swMod.artifacts:
-            updateSupFeature(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
+            updateLastOperation(cmd, "DOWNLOADING", "Downloading " + art.name, swMod)
             filePath = DownloadManager().download(art)
             swCache.addFile(filePath)
-            updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
+            updateLastOperation(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
             # # https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
-            updateSupFeature(cmd, "INSTALLING", "Executing script: " + filePath, swMod)
+            updateLastOperation(cmd, "INSTALLING", "Executing script: " + filePath, swMod)
             res = "Installed a script to the location {}.\n".format(filePath)
-            updateSupFeature(cmd, "INSTALLED", execResult, swMod)
+            updateLastOperation(cmd, "INSTALLED", execResult, swMod)
             execResult += res
         swCache.save()
-        swCache.createDittoFeature(client, deviceInfo, execResult)
-        updateSupFeature(cmd, "FINISHED_SUCCESS", execResult, swMod)   
+        swCache.updateDittoFeature(client, deviceInfo, execResult)
+        updateLastOperation(cmd, "FINISHED_SUCCESS", execResult, swMod)   
+  
 
-    
 # https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit:Status:2.0.0
-def updateSupFeature(cmd, status, message, swModule=None):
+def updateLastOperation(cmd, status, message, swModule=None):
     print(">>> sending sup update " + status + " with message: " + message)
     pth = "/features/{}/properties/status/lastOperation".format(cmd.featureId)
     

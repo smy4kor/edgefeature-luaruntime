@@ -16,7 +16,17 @@ class SoftwareFeatureCache:
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
     
-    def createDittoFeature(self,mqttClient,deviceInfo,executionResult):
+    def updateDittoFeature(self,mqttClient,deviceInfo,executionResult):
+        """Creates or updates the feature on ditto which represents this software module.
+    
+        Parameters
+        ----------
+        mqttClient : paho.mqtt.client
+            The mqtt client that has the connection to the local mosquitto provided by the edge device.
+        executionResult : Object
+            Result of the script execution.
+        """
+        
         dittoRspTopic = "{}/{}/things/twin/commands/modify".format(deviceInfo.namespace, deviceInfo.deviceId)
         value = {}
         # See https://vorto.eclipseprojects.io/#/details/com.bosch.iotsuite.generic:Executor:1.0.0
