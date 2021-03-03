@@ -19,8 +19,8 @@ class SoftwareFeatureCache:
     def createDittoFeature(self,mqttClient,deviceInfo,executionResult):
         dittoRspTopic = "{}/{}/things/twin/commands/modify".format(deviceInfo.namespace, deviceInfo.deviceId)
         value = {}
-        # https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
-        value["definition"] = ["vorto.private.test:Executor:1.0.0"]
+        # See https://vorto.eclipseprojects.io/#/details/com.bosch.iotsuite.generic:Executor:1.0.0
+        value["definition"] = ["com.bosch.iotsuite.generic:Executor:1.0.0"]
         value["properties"] = {}
         value["properties"]["status"]= {
             "files": self.files,
