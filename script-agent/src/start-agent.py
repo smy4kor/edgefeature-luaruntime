@@ -59,8 +59,8 @@ def handleSupEvent(cmd):
         aknowledge(cmd)
         handleRolloutRequest(cmd)
     elif SoftwareFeatureCache.hasCache(cmd.featureId):
-        print("Need to re-execute " + cmd.featureId)
-        execRes = reExecuteSoftware(cmd.featureId)
+        # if required, add additional check if vorto definition supports multiple operations.
+        execRes = executeSoftware(cmd.featureId)
         val = { "executionResult": execRes}
         aknowledge(cmd, value=execRes)
     else:
@@ -68,7 +68,7 @@ def handleSupEvent(cmd):
         # else, from cache file stored with cmd.featureId and execute the scripts stored there
 
 
-def reExecuteSoftware(featureId):
+def executeSoftware(featureId):
     swCache = SoftwareFeatureCache.loadOrCreate(featureId);
     execResult = ""
     for file in swCache.files:
@@ -91,8 +91,8 @@ def handleRolloutRequest(cmd):
             swCache.addFile(filePath)
             updateSupFeature(cmd, "DOWNLOADED", "Downloaded " + art.name, swMod)
             # # https://vorto.eclipseprojects.io/#/details/vorto.private.test:Executor:1.0.0
-            updateSupFeature(cmd, "INSTALLING", "Executing lua script: " + filePath, swMod)
-            res = ScriptExecutor().executeFile(filePath) + "\n"
+            updateSupFeature(cmd, "INSTALLING", "Executing script: " + filePath, swMod)
+            res = "Installed a script to the location {}.\n".format(filePath)
             updateSupFeature(cmd, "INSTALLED", execResult, swMod)
             execResult += res
         swCache.save()
