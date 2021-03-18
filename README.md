@@ -1,11 +1,15 @@
-# 1. Provisioning the device
+# Script Installer And Executor As Edge Feature
+This example shows how to implement [Software Updatable](https://vorto.eclipseprojects.io/#/details/org.eclipse.hawkbit.swupdatable:SoftwareUpdatable:2.0.0) agent that can install and executor a `python` or `lua` or `shell` script on an edge device.
+
+
+# Provisioning the device
 Download the edge agent. Copy the device `provisioning.json` to the directory containing the `start.sh`. If this step is not familiar, then see:
 * [Install and manage the Edge Agent](https://docs.bosch-iot-suite.com/edge/index.html#109641.htm)
 * [Register a device](https://docs.bosch-iot-suite.com/device-management/Register-a-device-via-the-Bosch-IoT-Manager-UI.html)
 
-# 2. Running the agent
+## Running the agent
 
-### 2.1 Manual Approach
+#### a. Manual Approach
 
 - Install the following prerequisites.
 
@@ -18,7 +22,7 @@ pip3 install paho-mqtt python-etcd
 ```
 - Run `python python-scripts/start-agent.py`.
 
-### 2.2 Running as a docker container
+#### b. Running as a docker container
 This approach is not tested. Below are some steps that could be used to achieve this.
 
 * Modify `python-scripts/start-agent.py` to use `ctrhost` as mosquitto host. Ex: ```client.connect("ctrhost", 1883)```
@@ -41,28 +45,28 @@ This approach is not tested. Below are some steps that could be used to achieve 
 ```
 * Please Note: The scripts must be executed in the host and not inside the container.
 
-# 3. Performing a software update
+## Performing a software update
 - Login to the [Rollouts UI](https://console.eu1.bosch-iot-rollouts.com/).
 - Navigate to `Distributions` tab and create a software module of type `script`.
 - Upload a `shell`, or `python` or `lua` script as an artifact. There are few sample script [here](./demo-lua-scripts/).
 - Create a distribution set from this software module and assign it to the device. Observe the action history.
 - You can also re-execute the scripts from the [Iot Manager UI](https://console.manager.eu-1.bosch-iot-suite.com/ui). 
 
-## 3.1 Limitation
+### Limitation
 If you delete an artifact on the rollouts, you must also manually update the cache file created by this agent on the device. To know where the cache is created, please [see here](./script-agent/src/softwareFeatureCache.py).
 
-# 4. Clean up
+## Clean up
 If you wish to clean up the runtime, here are the steps.
 - Delete the cache folder containing the artifacts associated with a feature id.
 - Delete all the features created by this agent on the IoT-Things.
 
-# 5. References
+## References
 * [Registering a device](https://docs.bosch-iot-suite.com/device-management/Register-a-device-via-the-Bosch-IoT-Manager-UI.html).
 * [Install and manage the Edge Agent](https://docs.bosch-iot-suite.com/edge/index.html#109641.htm)
 * [Ditto protocol](https://www.eclipse.org/ditto/1.5/protocol-specification-things-create-or-modify.html)
 * [Software updatable integration suite](https://docs.bosch-iot-suite.com/device-management/SoftwareUpdatable-feature-detailed-specification-and-integration-guide.html).
 
-# 6. Useful Snippets
+## Useful Snippets
 
 This agent does not use all concepts from ditto or edge device. So below you find some useful snippets that can be used on the device side if you wish to extend or improve this agent.
 
