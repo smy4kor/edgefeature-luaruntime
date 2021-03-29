@@ -19,6 +19,7 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
     # Subscribing to a topic that sends install or download command
     client.subscribe(MQTT_TOPIC)
+    client.publish('edge/thing/request','',qos=1);
     # hint: to register as agent or operation status, use "e".
 
 
@@ -111,6 +112,7 @@ def updateLastOperation(cmd, status, message, swModule=None):
     rsp.prepareSupResponse(cmd.getRolloutsCorrelationId(), status, message, swModule)
     if status == "FINISHED_SUCCESS":
         print("======== Done =============")
+        print(rsp.toJson())
     client.publish("e", rsp.toJson(), qos=1)
 
         
